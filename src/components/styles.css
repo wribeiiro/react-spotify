@@ -1,0 +1,35 @@
+.marquee {
+	width: 100%;
+	height: 90px;
+	padding: 40px;
+
+	overflow: hidden;
+	white-space: nowrap;
+	background: var(--purple);
+	color: var(--white);
+	
+	align-items: center;
+	justify-content: center;
+	display: flex;
+	flex-direction: row;
+
+	position: fixed;
+	bottom: 0;
+}
+
+.marquee span {
+    padding-left: 100%;
+    animation: marquee 12s linear infinite;
+	text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
+	font-size: 25px;
+	text-transform: uppercase;
+}
+
+@keyframes marquee {
+	0% {
+    	transform: translate(0, 0);
+  	}
+  	100% {
+    	transform: translate(-100%, 0);
+  	}
+}
