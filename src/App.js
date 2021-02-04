@@ -1,55 +1,30 @@
-import React, { Component } from "react";
-import $ from 'jquery'; 
-import { authEndpoint, clientId, redirectUri, scopes } from "./config";
-import hash from "./hash";
-import Marquee from './components/Marquee';
+import React, { useEffect, useState } from 'react'
+import $ from 'jquery'
+import { authEndpoint, clientId, redirectUri, scopes } from "./config"
+import hash from "./hash"
+import Marquee from './components/Marquee'
 
-class App extends Component {
-    constructor() {
-        super();
-        this.state = {
-            token: null,
-            item: {
-                album: {
-                    images: [{ url: "" }]
-                },
-                name: "",
-                artists: [{ name: "" }],
-                duration_ms: 0
-            },
-            is_playing: "Paused",
-            progress_ms: 0,
-            no_data: false
-        }
+function App() {
 
-        this.getCurSong = this.getCurSong.bind(this)
-        this.loopSong = this.loopSong.bind(this)
-    }
+    const [token, setToken] = useState(null)
+    const [item, setItem]   = useState({
+        album: {
+            images: [{
+                url: ""
+            }]
+        },
+        name: "",
+        artists: [{
+            name: ""
+        }],
+        duration_ms: 0
+    })
+    
+    const [isPlaying, setIsPlaying] = useState("Paused")
+    const [progressMs, setProgressMs] = useState(0)
+    const [noData, setNoData] = useState(false)
 
-    render() {
-        return (
-            <div className="App">
-                {!this.state.token && (
-                    <a
-                    className="btn"
-                    href={`${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join("%20")}&response_type=token&show_dialog=true`}
-                    >
-                        Login to Spotify
-                    </a>
-                )}
-                {this.state.token && !this.state.no_data && (
-                    <Marquee
-                        text={`Playing now:` + this.state.item.artists[0].name + " - " + this.state.item.name}
-                    />
-                )}
-                {this.state.no_data && (
-                    <p> You need to be playing a song on Spotify</p>
-                )}
-            </div>
-        );
-    }
-
-    getCurSong(token) {
+    const getCurrentSong = (token) => {
         $.ajax({
             url: "https://api.spotify.com/v1/me/player",
             type: "GET",
@@ -58,38 +33,58 @@ class App extends Component {
             },
             success: (data) => {
                 if (!data) {
-                    this.setState({no_data: true})
+                    setNoData(true)
                     return
                 }
 
-                this.setState({
-                    item: data.item,
-                    is_playing: data.is_playing,
-                    progress_ms: data.progress_ms,
-                    no_data: false
-                })
+                setItem(data.item)
+                setIsPlaying(data.is_playing)
+                setProgressMs(data.progress_ms)
+                setNoData(false)
             }
         })
     }
 
-    componentDidMount() {
-        let getToken = hash.access_token;
+    useEffect(() => {
+        loopCurrentSong()
+        
+        const interval = setInterval(() => {
+            loopCurrentSong()
+        }, 2000)
+
+        return () => clearInterval(interval)
+
+    }, [])
+
+    const loopCurrentSong = () => {
+        const getToken = hash.access_token
 
         if (getToken) {
-            this.setState({token: getToken})
-            this.getCurSong(getToken)
+            setToken(getToken)
+            getCurrentSong(getToken)
         }
-
-        this.interval = setInterval(() => this.loopSong(), 3000)
     }
 
-    componentWillUnmount() {
-        clearInterval(this.interval);
-    }
-
-    loopSong() {
-        if (this.state.token) this.getCurSong(this.state.token)
-    }
+    return (
+        <div className="App">
+            {!token && (
+                <a
+                    className="btn btn-login"
+                    href={`${authEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes.join("%20")}&response_type=token&show_dialog=true`}
+                >
+                    Login to Spotify
+                </a>
+            )}
+            {token && !noData && (
+                <Marquee
+                    text={`Playing now:` + item.artists[0].name + " - " + item.name}
+                />
+            )}
+            {noData && (
+                <p> You need to be playing a song on Spotify</p>
+            )}
+        </div>
+    );
 }
 
-export default App;
+export default App

@@ -12,7 +12,7 @@
   --white: #FFFFFF;
   --frontEnd: #6BD1FF;
   --backEnd: #00C86F;
-  --purple: #8205B3;
+  --purple: #7159C1;
 }
 
 html,
@@ -23,6 +23,8 @@ body {
 
 a {
   color: inherit;
+  text-align: center;
+  margin-top: 120px;
 } 
 
 #root {

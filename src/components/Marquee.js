@@ -4,10 +4,10 @@ import "./styles.css";
 
 function Marquee({text}) {
     return (
-        <div class="marquee">
+        <div className="marquee">
             <span>{text}</span>
         </div>
     )
 }
 
-export default Marquee;
+export default Marquee
